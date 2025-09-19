@@ -1,0 +1,5 @@
+/vendor
+/database.sqlite
+/src/config.php
+database.sqlite
+.phpunit.result.cache

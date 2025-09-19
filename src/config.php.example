@@ -1,0 +1,24 @@
+<?php
+
+$appEnv = getenv('APP_ENV') ?: 'development';
+
+if ($appEnv === 'production') {
+    // Production configuration (MySQL)
+    return [
+        'db' => [
+            'driver' => 'mysql',
+            'host'   => 'localhost',
+            'name'   => 'u794205540_toycal',
+            'user'   => 'YOUR_DB_USER',
+            'pass'   => 'YOUR_DB_PASS'
+        ]
+    ];
+} else {
+    // Development configuration (SQLite)
+    return [
+        'db' => [
+            'driver' => 'sqlite',
+            'path'   => __DIR__ . '/../database.sqlite'
+        ]
+    ];
+}

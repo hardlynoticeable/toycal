@@ -20,6 +20,16 @@ This project provides a set of backend tools that can be used by an AI assistant
 - Composer for package management
 - PHPUnit for automated testing
 
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+- **PHP**: Version 8.2 or higher. You will also need the `pdo_sqlite` extension for local development/testing and `pdo_mysql` for production.
+- **Composer**: The PHP package manager. For installation instructions, visit [getcomposer.org](https://getcomposer.org/download/).
+- **SQLite**: The `sqlite3` command-line interface is required to set up the local database. 
+    - On Debian/Ubuntu, you can install it with: `sudo apt install sqlite3`
+    - For other operating systems, search for "install sqlite3 on [your OS]".
+
 ## Setup and Installation
 
 1.  **Clone the Repository**
@@ -62,5 +72,3 @@ To run the automated test suite, execute the following command from the project 
 ```bash
 ./vendor/bin/phpunit
 ```
-# toycal
-# toycal
