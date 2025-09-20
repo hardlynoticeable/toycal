@@ -1,6 +1,6 @@
 # Toy Cal
 
-A simple, proof-of-concept Calendar and Contact MCP (Model Context Protocol) server written in PHP.
+A simple, MCP (Model Context Protocol) Calendar Server written in PHP.  You can run it locally or on nearly any hosting service.  
 
 This project provides a set of backend tools that can be used by an AI assistant to manage a simple calendar and contact list.
 
