@@ -4,6 +4,8 @@ A simple, MCP (Model Context Protocol) Calendar Server written in PHP.  You can 
 
 This project provides a set of backend tools that can be used by an AI assistant to manage a simple calendar and contact list.
 
+**There is virtually no security.  It is not recommended for production use.**
+
 ## Features
 
 - **Contacts Management**: Full CRUD (Create, Read, Update, Delete) functionality for contacts.
