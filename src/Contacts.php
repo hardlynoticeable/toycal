@@ -16,7 +16,7 @@ class Contacts
      * @param string|null $notes Any notes about the contact.
      * @return string A confirmation message.
      */
-    #[McpTool]
+    #[McpTool(name: 'contacts-create', description: "Creates a new contact.")]
     public function create(string $name, ?string $email = null, ?string $phone = null, ?string $notes = null): string
     {
         // Basic validation
@@ -50,7 +50,7 @@ class Contacts
      *
      * @return string A JSON string representing a list of contacts.
      */
-    #[McpTool]
+    #[McpTool(name: 'contacts-list', description: "Lists all contacts, ordered by name.")]
     public function list(): string
     {
         $sql = "SELECT id, name, email, phone, notes FROM contacts ORDER BY name ASC";
@@ -73,7 +73,7 @@ class Contacts
      * @param string $searchTerm The name, email, or phone number to search for.
      * @return string A JSON string of matching contacts.
      */
-    #[McpTool]
+    #[McpTool(name: 'contacts-find', description: "Finds contacts by name, email, or phone number.")]
     public function find(string $searchTerm): string
     {
         $sql = "SELECT id, name, email, phone, notes FROM contacts WHERE name LIKE ? OR email = ? OR phone = ?";
@@ -101,7 +101,7 @@ class Contacts
      * @param string|null $notes The new notes.
      * @return string A confirmation message.
      */
-    #[McpTool]
+    #[McpTool(name: 'contacts-update', description: "Updates an existing contact's details.")]
     public function update(int $id, ?string $name = null, ?string $email = null, ?string $phone = null, ?string $notes = null): string
     {
         $fields = [];
@@ -151,7 +151,7 @@ class Contacts
      * @param int $id The ID of the contact to delete.
      * @return string A confirmation message.
      */
-    #[McpTool]
+    #[McpTool(name: 'contacts-delete', description: "Deletes a contact.")]
     public function delete(int $id): string
     {
         $sql = "DELETE FROM contacts WHERE id = ?";

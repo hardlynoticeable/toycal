@@ -18,7 +18,7 @@ class Events
      * @param int[]|null $contactIds An array of contact IDs to associate with this event.
      * @return string A confirmation message.
      */
-    #[McpTool]
+    #[McpTool(name: 'events-create', description: "Creates a new event and optionally links it to a list of contact IDs.")]
     public function create(string $heading, int $startTime, int $endTime, ?string $description = null, ?array $contactIds = null): string
     {
         if (empty(trim($heading))) {
@@ -66,7 +66,7 @@ class Events
      *
      * @return string A JSON string representing a list of events.
      */
-    #[McpTool]
+    #[McpTool(name: 'events-list', description: "Lists all events, ordered by start time.")]
     public function list(): string
     {
         $sql = "SELECT id, heading, description, start_time, end_time FROM events ORDER BY start_time ASC";
@@ -90,7 +90,7 @@ class Events
      * @param int $endTime The UNIX timestamp for the end of the search window.
      * @return string A JSON string of matching events.
      */
-    #[McpTool]
+    #[McpTool(name: 'events-find', description: "Finds events that overlap with a given time range.")]
     public function find(int $startTime, int $endTime): string
     {
         // Find events where the event's time span overlaps with the query's time span.
@@ -120,7 +120,7 @@ class Events
      * @param string|null $description The new description.
      * @return string A confirmation message.
      */
-    #[McpTool]
+    #[McpTool(name: 'events-update', description: "Updates an existing event's details.")]
     public function update(int $id, ?string $heading = null, ?int $startTime = null, ?int $endTime = null, ?string $description = null): string
     {
         $fields = [];
@@ -170,7 +170,7 @@ class Events
      * @param int $id The ID of the event to delete.
      * @return string A confirmation message.
      */
-    #[McpTool]
+    #[McpTool(name: 'events-delete', description: "Deletes an event and its associations.")]
     public function delete(int $id): string
     {
         $pdo = Database::getConnection();

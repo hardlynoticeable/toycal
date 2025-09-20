@@ -1,10 +1,15 @@
 <?php
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 use App\Database;
 use PhpMcp\Server\Http\Request;
 use PhpMcp\Server\Server;
+use PhpMcp\Server\Defaults\ArrayConfigurationRepository;
 
 // It's good practice to set a default timezone.
 date_default_timezone_set('UTC');
@@ -35,15 +40,22 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Build the server configuration
-$server = Server::make()
-    ->withServerInfo('Toy Cal Server', '1.0.0')
-    ->build();
+$configRepo = new ArrayConfigurationRepository([
+    'mcp' => [
+        'server' => [
+            'name' => 'Toy Cal Server',
+            'version' => '1.0.0'
+        ],
+    ],
+]);
 
-// Discover MCP elements via attributes in the 'src' directory
-$server->discover(
-    basePath: __DIR__,
-    scanDirs: ['src']
-);
+$server = Server::make()
+    ->withConfig($configRepo)
+    ->withBasePath(__DIR__)
+    ->withScanDirectories(['src']);
+
+// Discover MCP elements via attributes
+$server->discover();
 
 // Create a request object from the incoming HTTP request
 $request = new Request(
@@ -60,4 +72,3 @@ foreach ($response->headers as $name => $value) {
     header("$name: $value");
 }
 echo $response->body;
-
