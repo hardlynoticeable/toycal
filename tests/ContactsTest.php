@@ -56,7 +56,8 @@ class ContactsTest extends TestCase
         $result = $this->contacts->list();
         $this->assertEquals('No contacts found.', $result);
 
-        // 2. Test with multiple contacts
+        // 2. Test with multiple contacts and default order (name ASC)
+        $this->contacts->create('Charlie', 'charlie@example.com');
         $this->contacts->create('Alice', 'alice@example.com');
         $this->contacts->create('Bob', 'bob@example.com');
 
@@ -64,28 +65,81 @@ class ContactsTest extends TestCase
         $decoded = json_decode($result, true);
 
         $this->assertIsArray($decoded);
-        $this->assertCount(2, $decoded);
+        $this->assertCount(3, $decoded);
         $this->assertEquals('Alice', $decoded[0]['name']);
         $this->assertEquals('Bob', $decoded[1]['name']);
+        $this->assertEquals('Charlie', $decoded[2]['name']);
+
+        // 3. Test ordering by email DESC
+        $result = $this->contacts->list('email', 'DESC');
+        $decoded = json_decode($result, true);
+        $this->assertEquals('charlie@example.com', $decoded[0]['email']);
+        $this->assertEquals('bob@example.com', $decoded[1]['email']);
+        $this->assertEquals('alice@example.com', $decoded[2]['email']);
     }
 
     public function testFindContact(): void
     {
         // 1. Test with no matching contacts
-        $result = $this->contacts->find('nobody');
+        $result = $this->contacts->find('email', 'nobody@example.com');
         $this->assertEquals('No contacts found matching that term.', $result);
 
-        // 2. Test finding a specific contact
+        // 2. Test finding by a specific field (email)
         $this->contacts->create('Carol', 'carol@example.com', '555-0123');
         $this->contacts->create('David', 'david@example.com');
 
-        // Find by email
-        $result = $this->contacts->find('carol@example.com');
+        $result = $this->contacts->find('email', 'carol@example.com');
         $decoded = json_decode($result, true);
 
         $this->assertIsArray($decoded);
         $this->assertCount(1, $decoded);
         $this->assertEquals('Carol', $decoded[0]['name']);
+
+        // 3. Test finding by id
+        $this->contacts->create('Eve', 'eve@example.com');
+        $id = $this->pdo->lastInsertId();
+        $result = $this->contacts->find('id', (string)$id);
+        $decoded = json_decode($result, true);
+        $this->assertCount(1, $decoded);
+        $this->assertEquals('Eve', $decoded[0]['name']);
+    }
+
+    public function testFindContactByNameFlexible(): void
+    {
+        $this->contacts->create('Stephen J. Akins', 'stephen@example.com');
+        $this->contacts->create('Steven Smith', 'steven@example.com');
+
+        // Find by first name
+        $result = $this->contacts->find('name', 'Stephen');
+        $decoded = json_decode($result, true);
+        $this->assertCount(1, $decoded);
+        $this->assertEquals('Stephen J. Akins', $decoded[0]['name']);
+
+        // Find by last name
+        $result = $this->contacts->find('name', 'Akins');
+        $decoded = json_decode($result, true);
+        $this->assertCount(1, $decoded);
+
+        // Find by first and last name
+        $result = $this->contacts->find('name', 'Stephen Akins');
+        $decoded = json_decode($result, true);
+        $this->assertCount(1, $decoded);
+
+        // Find by initial and last name
+        $result = $this->contacts->find('name', 'J. Akins');
+        $decoded = json_decode($result, true);
+        $this->assertCount(1, $decoded);
+
+        // Find with multiple matches
+        $result = $this->contacts->find('name', 'Ste');
+        $decoded = json_decode($result, true);
+        $this->assertCount(2, $decoded);
+    }
+
+    public function testFindContactWithInvalidField(): void
+    {
+        $result = $this->contacts->find('zodiac_sign', 'Leo');
+        $this->assertEquals('Error: Invalid search field specified. Allowed fields are: id, name, email, phone.', $result);
     }
 
     public function testUpdateContact(): void

@@ -48,12 +48,23 @@ class Contacts
     /**
      * Lists all contacts.
      *
+     * @param string $orderBy The field to order by (e.g., 'name', 'email'). Defaults to 'name'.
+     * @param string $order The direction to order (ASC or DESC). Defaults to 'ASC'.
      * @return string A JSON string representing a list of contacts.
      */
-    #[McpTool(name: 'contacts-list', description: "Lists all contacts, ordered by name.")]
-    public function list(): string
+    #[McpTool(name: 'contacts-list', description: "Lists all contacts, with optional sorting.")]
+    public function list(string $orderBy = 'name', string $order = 'ASC'): string
     {
-        $sql = "SELECT id, name, email, phone, notes FROM contacts ORDER BY name ASC";
+        // Prevent SQL injection by validating orderBy parameter
+        $allowedOrderBy = ['id', 'name', 'email', 'phone', 'created_at', 'updated_at'];
+        if (!in_array(strtolower($orderBy), $allowedOrderBy)) {
+            $orderBy = 'name';
+        }
+
+        // Validate order parameter
+        $order = strtoupper($order) === 'DESC' ? 'DESC' : 'ASC';
+
+        $sql = "SELECT id, name, email, phone, notes FROM contacts ORDER BY {$orderBy} {$order}";
         
         $pdo = Database::getConnection();
         $stmt = $pdo->query($sql);
@@ -68,19 +79,46 @@ class Contacts
     }
 
     /**
-     * Finds contacts by name, email, or phone.
+     * Finds contacts by a specific field and value.
      *
-     * @param string $searchTerm The name, email, or phone number to search for.
+     * @param string $field The field to search by. Must be one of: 'id', 'name', 'email', 'phone'.
+     * @param string $value The value to search for.
      * @return string A JSON string of matching contacts.
      */
-    #[McpTool(name: 'contacts-find', description: "Finds contacts by name, email, or phone number.")]
-    public function find(string $searchTerm): string
+    #[McpTool(name: 'contacts-find', description: "Finds contacts by a specific field (id, name, email, or phone).")]
+    public function find(string $field, string $value): string
     {
-        $sql = "SELECT id, name, email, phone, notes FROM contacts WHERE name LIKE ? OR email = ? OR phone = ?";
-        
+        $allowedFields = ['id', 'name', 'email', 'phone'];
+        if (!in_array(strtolower($field), $allowedFields)) {
+            return "Error: Invalid search field specified. Allowed fields are: id, name, email, phone.";
+        }
+
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute(["%{$searchTerm}%", $searchTerm, $searchTerm]);
+        
+        if (strtolower($field) === 'name') {
+            // Handle flexible name searching
+            $searchTerms = explode(' ', $value);
+            $sqlParts = [];
+            $params = [];
+            foreach ($searchTerms as $term) {
+                $term = trim($term);
+                if (!empty($term)) {
+                    $sqlParts[] = "name LIKE ?";
+                    $params[] = '%' . $term . '%';
+                }
+            }
+            if (empty($sqlParts)) {
+                return "No contacts found matching that term.";
+            }
+            $sql = "SELECT id, name, email, phone, notes FROM contacts WHERE " . implode(' AND ', $sqlParts);
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+        } else {
+            // Handle exact matches for other fields
+            $sql = "SELECT id, name, email, phone, notes FROM contacts WHERE {$field} = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$value]);
+        }
         
         $contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         

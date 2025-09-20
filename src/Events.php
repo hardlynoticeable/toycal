@@ -66,7 +66,7 @@ class Events
      *
      * @return string A JSON string representing a list of events.
      */
-    #[McpTool(name: 'events-list', description: "Lists all events, ordered by start time.")]
+    #[McpTool(name: 'events-list', description: "Lists all events, ordered by start time.  It is recommended to use the events-find tool instead as you can limit the number of results.")]
     public function list(): string
     {
         $sql = "SELECT id, heading, description, start_time, end_time FROM events ORDER BY start_time ASC";
